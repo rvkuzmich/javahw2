@@ -18,32 +18,28 @@ public class AuthorDao implements AuthorRepository {
     private static final String AUTHOR_SURNAME_COLUMN_LABEL = "surname";
     private static final AuthorDao INSTANCE = new AuthorDao();
     private static final String SAVE_SQL = """
-                insert into author (name, surname)
+                insert into library.author (name, surname)
                 values (?, ?)
             """;
     private static final String UPDATE_SQL = """
-            update author
+            update library.author
             set name = ?,
                 surname = ?
             where id = ?;
             """;
     private static final String DELETE_SQL = """
-                delete from author
+                delete from library.author
                 where id = ?
             """;
     private static final String FIND_BY_ID_SQL = """
-                select public.author.id, public.author.name, public.author.surname, public.book.author_id, public.book.title, public.book.page_count
-                from public.author left join book on public.author.id = public.book.author_id
-                where public.author.id = ?
+                select library.author.id, library.author.name, library.author.surname, library.book.id, library.book.title,
+                       library.book.page_count, library.book.author_id
+                from library.author left join library.book on author.id = library.book.author_id
+                where library.author.id = ?
             """;
     private static final String FIND_ALL_AUTHORS_SQL = """
-                select public.author.id, public.author.name, public.author.surname
-                from public.author
-            """;
-    private static final String FIND_BY_NAME_AND_SURNAME_SQL = """
-            select id, name, surname
-            from author
-            where name = ? and surname = ?
+                select library.author.id, library.author.name, library.author.surname
+                from library.author
             """;
 
     @Override
@@ -69,6 +65,7 @@ public class AuthorDao implements AuthorRepository {
              var statement = connection.prepareStatement(UPDATE_SQL)) {
             statement.setString(1, author.getName());
             statement.setString(2, author.getSurname());
+            statement.setLong(3, author.getId());
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new DaoException(e);
@@ -100,7 +97,9 @@ public class AuthorDao implements AuthorRepository {
                             resultSet.getString("name"),
                             resultSet.getString(AUTHOR_SURNAME_COLUMN_LABEL));
                 }
-                books.add(new Book(resultSet.getString("title"), resultSet.getInt("page_count")));
+                books.add(new Book(resultSet.getLong("id"),
+                        resultSet.getString("title"),
+                        resultSet.getInt("page_count")));
             }
             if (author != null) {
                 author.setBookList(books);
@@ -141,24 +140,6 @@ public class AuthorDao implements AuthorRepository {
             throw new DaoException(e);
         }
         return authors;
-    }
-
-    public Optional<Author> findByNameAndSurname(String name, String surname) {
-        try (var connection = ConnectionManager.get();
-             var statement = connection.prepareStatement(FIND_BY_NAME_AND_SURNAME_SQL)) {
-            statement.setString(1, name);
-            statement.setString(2, surname);
-            ResultSet resultSet = statement.executeQuery();
-            Author author = null;
-            if (resultSet.next()) {
-                author = new Author(resultSet.getLong("id"),
-                        resultSet.getString("name"),
-                        resultSet.getString(AUTHOR_SURNAME_COLUMN_LABEL));
-            }
-            return Optional.ofNullable(author);
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        }
     }
 
     public static AuthorDao getInstance() {

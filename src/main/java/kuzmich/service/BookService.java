@@ -1,8 +1,9 @@
 package kuzmich.service;
 
-import kuzmich.dto.BookDto;
 import kuzmich.dao.AuthorDao;
 import kuzmich.dao.BookDao;
+import kuzmich.dto.AuthorDto;
+import kuzmich.dto.BookDto;
 import kuzmich.entity.Author;
 import kuzmich.entity.Book;
 
@@ -20,18 +21,17 @@ public class BookService {
     }
 
     public BookDto save(BookDto bookDto) {
-        Optional<Author> authorOptional = authorDao.findByNameAndSurname(bookDto.getAuthor().getName(), bookDto.getAuthor().getSurname());
+        Optional<Author> authorOptional = authorDao.findById(bookDto.getAuthor().getId());
         Author author = null;
         if (authorOptional.isPresent()) {
-            author = (Author) authorOptional.get();
+            author = authorOptional.get();
         }
         Book book = bookDao.save(new Book(bookDto.getTitle(), bookDto.getPageCount(), author));
         return mapToBookDto(book);
     }
 
     public boolean update(BookDto bookDto) {
-        Book book = mapToBook(bookDto);
-        return bookDao.update(book);
+        return bookDao.update(mapToBook(bookDto));
     }
 
     public boolean delete(long id) {
@@ -52,7 +52,8 @@ public class BookService {
         book.setId(bookDto.getId());
         book.setTitle(bookDto.getTitle());
         book.setPageCount(bookDto.getPageCount());
-        book.setAuthor(bookDto.getAuthor());
+        book.setAuthor(new Author(bookDto.getAuthor().getId(),
+                bookDto.getAuthor().getName(), bookDto.getAuthor().getSurname()));
         return book;
     }
 
@@ -61,7 +62,8 @@ public class BookService {
         bookDto.setId(book.getId());
         bookDto.setTitle(book.getTitle());
         bookDto.setPageCount(book.getPageCount());
-        bookDto.setAuthor(book.getAuthor());
+        bookDto.setAuthor(new Author(book.getAuthor().getId(),
+                book.getAuthor().getName(), book.getAuthor().getSurname()));
         return bookDto;
     }
 }

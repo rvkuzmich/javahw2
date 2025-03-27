@@ -17,6 +17,10 @@ public class AuthorDto {
         this.surname = surname;
     }
 
+    public AuthorDto(long id) {
+        this.id = id;
+    }
+
     public AuthorDto(String name, String surname) {
         this.name = name;
         this.surname = surname;

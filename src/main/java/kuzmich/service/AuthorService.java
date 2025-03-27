@@ -47,16 +47,19 @@ public class AuthorService {
         author.setId(authorDto.getId());
         author.setName(authorDto.getName());
         author.setSurname(authorDto.getSurname());
-        List<BookDto> bookDtoList = authorDto.getBookDtoList();
-        List<Book> bookList = new ArrayList<>();
-        for (BookDto bookDto : bookDtoList) {
-            Book book = new Book();
-            book.setId(bookDto.getId());
-            book.setTitle(bookDto.getTitle());
-            book.setAuthor(author);
-            bookList.add(book);
+        if (authorDto.getBookDtoList() != null) {
+            List<BookDto> bookDtoList = authorDto.getBookDtoList();
+            List<Book> bookList = new ArrayList<>();
+            for (BookDto bookDto : bookDtoList) {
+                Book book = new Book();
+                book.setId(bookDto.getId());
+                book.setTitle(bookDto.getTitle());
+                book.setAuthor(author);
+                bookList.add(book);
+            }
+            author.setBookList(bookList);
         }
-        author.setBookList(bookList);
+
         return author;
     }
 
@@ -65,16 +68,21 @@ public class AuthorService {
         authorDto.setId(author.getId());
         authorDto.setName(author.getName());
         authorDto.setSurname(author.getSurname());
-        List<BookDto> bookDtoList = new ArrayList<>();
-        List<Book> bookList = author.getBookList();
-        for (Book book : bookList) {
-            BookDto bookDto = new BookDto();
-            bookDto.setId(book.getId());
-            bookDto.setTitle(book.getTitle());
-            bookDto.setAuthor(author);
-            bookDtoList.add(bookDto);
+        if (author.getBookList() != null) {
+            List<BookDto> bookDtoList = new ArrayList<>();
+            List<Book> bookList = author.getBookList();
+            for (Book book : bookList) {
+                BookDto bookDto = new BookDto();
+                bookDto.setId(book.getId());
+                bookDto.setTitle(book.getTitle());
+                bookDto.setPageCount(book.getPageCount());
+                bookDto.setAuthor(new Author(author.getId(),author.getName(),author.getSurname()));
+                bookDtoList.add(bookDto);
+            }
+            authorDto.setBookDtoList(bookDtoList);
+        } else {
+            authorDto.setBookDtoList(new ArrayList<>());
         }
-        authorDto.setBookDtoList(bookDtoList);
         return authorDto;
     }
 }

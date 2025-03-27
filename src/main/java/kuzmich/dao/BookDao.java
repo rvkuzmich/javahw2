@@ -16,30 +16,31 @@ import java.util.Optional;
 public class BookDao implements BookRepository {
     private static final BookDao INSTANCE = new BookDao();
     private static final String SAVE_SQL = """
-            insert into book (title, page_count, author_id)
+            insert into library.book (title, page_count, author_id)
             values (?, ?, ?)
             """;
     private static final String UPDATE_SQL = """
-            update book
+            update library.book
             set title = ?,
                 page_count = ?,
                 author_id = ?
             where id = ?;
             """;
     private static final String DELETE_SQL = """
-            delete from book
+            delete from library.book
             where id = ?;
             """;
     private static final String FIND_BY_ID_SQL = """
-            select public.book.id, public.book.title, public.book.page_count,
-                   public.author.id as author_id, public.author.name, public.author.surname
-            from public.book left join author on book.author_id = author.id
-            where public.book.id = ?
+            select library.book.id, library.book.title, library.book.page_count,
+                   library.author.id as author_id, library.author.name, library.author.surname
+            from library.book left join library.author on book.author_id = library.author.id
+            where library.book.id = ?
             """;
     private static final String FIND_ALL_SQL = """
-            select public.book.id, public.book.title, public.book.page_count, public.author.name, public.author.surname
-            from public.book left join author on book.author_id = author.id
-            order by public.book.id
+            select library.book.id, library.book.title, library.book.page_count, library.book.author_id as author_id,
+                   library.author.name, library.author.surname
+            from library.book left join library.author on book.author_id = library.author.id
+            order by library.book.id
             """;
 
     @Override
@@ -67,6 +68,7 @@ public class BookDao implements BookRepository {
             statement.setString(1, book.getTitle());
             statement.setInt(2, book.getPageCount());
             statement.setLong(3, book.getAuthor().getId());
+            statement.setLong(4, book.getId());
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new DaoException(e);

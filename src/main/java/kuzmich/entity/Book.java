@@ -29,6 +29,12 @@ public class Book {
         this.author = author;
     }
 
+    public Book(long id, String title, int pageCount) {
+        this.id = id;
+        this.title = title;
+        this.pageCount = pageCount;
+    }
+
     public long getId() {
         return id;
     }

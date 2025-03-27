@@ -55,4 +55,14 @@ public class BookDto {
     public void setAuthor(Author author) {
         this.author = author;
     }
+
+    @Override
+    public String toString() {
+        return "BookDto{" +
+               "id=" + id +
+               ", title='" + title + '\'' +
+               ", pageCount=" + pageCount +
+               ", author=" + author +
+               '}';
+    }
 }

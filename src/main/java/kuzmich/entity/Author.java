@@ -24,6 +24,10 @@ public class Author {
         this.surname = surname;
     }
 
+    public Author(long id) {
+        this.id = id;
+    }
+
     public long getId() {
         return id;
     }
