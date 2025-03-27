@@ -5,7 +5,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import kuzmich.dto.AuthorDto;
 import kuzmich.dto.BookDto;
 import kuzmich.entity.Author;
 import kuzmich.service.BookService;
@@ -113,21 +112,21 @@ public class BookServlet extends HttpServlet {
         try (PrintWriter out = resp.getWriter()) {
             String pathInfo = req.getPathInfo();
             String[] parts = pathInfo.split("/");
-            System.out.println(parts[1]);
-            System.out.println(req.getParameter(PAGE_COUNT_PARAMETER));
-            System.out.println(req.getParameter(TITLE_PARAMETER));
             if (isNumeric(parts[1])) {
                 long bookId = Long.parseLong(parts[1]);
                 BookDto bookDto = new BookDto();
-                bookDto.setId(bookId);
-                bookDto.setTitle(req.getParameter(TITLE_PARAMETER));
-                if (isNumeric(req.getParameter(PAGE_COUNT_PARAMETER))) {
-                    bookDto.setPageCount(Integer.parseInt(req.getParameter(PAGE_COUNT_PARAMETER)));
-                } else {
-                    out.write("Некорректный параметр страниц книги");
-                    return;
+                if (!req.getParameter(TITLE_PARAMETER).isBlank()
+                    && !req.getParameter(PAGE_COUNT_PARAMETER).isBlank()
+                    && !req.getParameter(AUTHOR_ID_PARAMETER).isBlank()) {
+                    bookDto.setId(bookId);
+                    bookDto.setTitle(req.getParameter(TITLE_PARAMETER));
+                    if (isNumeric(req.getParameter(PAGE_COUNT_PARAMETER))) {
+                        bookDto.setPageCount(Integer.parseInt(req.getParameter(PAGE_COUNT_PARAMETER)));
+                    } else {
+                        out.write("Некорректный параметр страниц книги");
+                        return;
+                    }
                 }
-
                 boolean res = bookService.update(bookDto);
                 if (res) {
                     out.print("Книга успешно обновлена");
