@@ -2,20 +2,16 @@ package kuzmich.utils;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import kuzmich.exception.SqlConnectionException;
 
-import java.lang.reflect.Proxy;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 
 public final class ConnectionManager {
+    private static final String DRIVER_KEY = "db.driver";
     private static final String URL_KEY = "db.url";
     private static final String USERNAME_KEY = "db.username";
     private static final String PASSWORD_KEY = "db.password";
-    private static final int DEFAULT_POOL_SIZE = 10;
-    private static final String POOL_SIZE_KEY = "db.pool.size";
     private static HikariDataSource dataSource;
 
     static {
@@ -24,10 +20,10 @@ public final class ConnectionManager {
 
     private static void initConnectionPool() {
         HikariConfig config = new HikariConfig();
-        config.setDriverClassName("org.postgresql.Driver");
-        config.setJdbcUrl("jdbc:postgresql://localhost:5432/library");
-        config.setUsername("postgres");
-        config.setPassword("root");
+        config.setDriverClassName(PropertiesUtil.get(DRIVER_KEY));
+        config.setJdbcUrl(PropertiesUtil.get(URL_KEY));
+        config.setUsername(PropertiesUtil.get(USERNAME_KEY));
+        config.setPassword(PropertiesUtil.get(PASSWORD_KEY));
         dataSource = new HikariDataSource(config);
     }
 
@@ -35,7 +31,7 @@ public final class ConnectionManager {
         try {
             return dataSource.getConnection();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new SqlConnectionException(e);
         }
     }
 

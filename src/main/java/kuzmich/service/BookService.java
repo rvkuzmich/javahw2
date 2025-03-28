@@ -31,7 +31,8 @@ public class BookService {
     }
 
     public boolean update(BookDto bookDto) {
-        return bookDao.update(mapToBook(bookDto));
+        Book book = mapToBook(bookDto);
+        return bookDao.update(book);
     }
 
     public boolean delete(long id) {
@@ -52,8 +53,7 @@ public class BookService {
         book.setId(bookDto.getId());
         book.setTitle(bookDto.getTitle());
         book.setPageCount(bookDto.getPageCount());
-        book.setAuthor(new Author(bookDto.getAuthor().getId(),
-                bookDto.getAuthor().getName(), bookDto.getAuthor().getSurname()));
+        book.setAuthor(new Author(bookDto.getAuthor().getId()));
         return book;
     }
 

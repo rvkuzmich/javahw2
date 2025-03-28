@@ -120,18 +120,19 @@ public class BookServlet extends HttpServlet {
                     && !req.getParameter(AUTHOR_ID_PARAMETER).isBlank()) {
                     bookDto.setId(bookId);
                     bookDto.setTitle(req.getParameter(TITLE_PARAMETER));
-                    if (isNumeric(req.getParameter(PAGE_COUNT_PARAMETER))) {
+                    if (isNumeric(req.getParameter(PAGE_COUNT_PARAMETER))
+                        && isNumeric(req.getParameter(AUTHOR_ID_PARAMETER))) {
                         bookDto.setPageCount(Integer.parseInt(req.getParameter(PAGE_COUNT_PARAMETER)));
+                        bookDto.setAuthor(new Author(Long.parseLong(req.getParameter(AUTHOR_ID_PARAMETER))));
                     } else {
-                        out.write("Некорректный параметр страниц книги");
-                        return;
+                        out.write("Некорректный параметр страниц книги или id автора");
                     }
-                }
-                boolean res = bookService.update(bookDto);
-                if (res) {
-                    out.print("Книга успешно обновлена");
-                } else {
-                    out.print("Некорректный идентификатор книги");
+                    boolean res = bookService.update(bookDto);
+                    if (res) {
+                        out.print("Книга успешно обновлена");
+                    } else {
+                        out.print("Некорректный идентификатор книги");
+                    }
                 }
             }
         } catch (IOException e) {
