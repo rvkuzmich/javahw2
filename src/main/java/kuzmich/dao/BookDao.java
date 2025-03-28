@@ -16,31 +16,31 @@ import java.util.Optional;
 public class BookDao implements BookRepository {
     private static final BookDao INSTANCE = new BookDao();
     private static final String SAVE_SQL = """
-            insert into library.book (title, page_count, author_id)
+            insert into book (title, page_count, author_id)
             values (?, ?, ?)
             """;
     private static final String UPDATE_SQL = """
-            update library.book
+            update book
             set title = ?,
                 page_count = ?,
                 author_id = ?
             where id = ?;
             """;
     private static final String DELETE_SQL = """
-            delete from library.book
+            delete from book
             where id = ?;
             """;
     private static final String FIND_BY_ID_SQL = """
-            select library.book.id, library.book.title, library.book.page_count,
-                   library.author.id as author_id, library.author.name, library.author.surname
-            from library.book left join library.author on book.author_id = library.author.id
-            where library.book.id = ?
+            select book.id, book.title, book.page_count,
+                   author.id as author_id, author.name, author.surname
+            from book left join author on book.author_id = author.id
+            where book.id = ?
             """;
     private static final String FIND_ALL_SQL = """
-            select library.book.id, library.book.title, library.book.page_count, library.book.author_id as author_id,
-                   library.author.name, library.author.surname
-            from library.book left join library.author on book.author_id = library.author.id
-            order by library.book.id
+            select book.id, book.title, book.page_count, book.author_id as author_id,
+                   author.name, author.surname
+            from book left join author on book.author_id = author.id
+            order by book.id
             """;
 
     @Override

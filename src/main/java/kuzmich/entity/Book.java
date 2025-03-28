@@ -69,13 +69,9 @@ public class Book {
 
     @Override
     public boolean equals(Object o) {
-
         if (!(o instanceof Book)) return false;
         Book book = (Book) o;
-        return id == book.id
-               && pageCount == book.pageCount
-               && Objects.equals(title, book.title)
-               && Objects.equals(author, book.author);
+        return id == book.id && Objects.equals(title, book.title);
     }
 
     @Override

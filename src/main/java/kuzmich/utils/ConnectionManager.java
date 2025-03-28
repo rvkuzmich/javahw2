@@ -35,6 +35,14 @@ public final class ConnectionManager {
         }
     }
 
+    public static void setConnectionForTests(String url, String username, String password) {
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(url);
+        config.setUsername(username);
+        config.setPassword(password);
+        dataSource = new HikariDataSource(config);
+    }
+
     private ConnectionManager() {
     }
 }

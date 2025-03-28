@@ -15,32 +15,40 @@ import java.util.Optional;
 
 public class AuthorDao implements AuthorRepository {
 
-    private static final String AUTHOR_SURNAME_COLUMN_LABEL = "surname";
     private static final AuthorDao INSTANCE = new AuthorDao();
+    private static final String AUTHOR_SURNAME_COLUMN_LABEL = "surname";
+    private static final String CREATE_TABLE_IF_NOT_EXISTS_SQL = """
+            create table if not exists author(
+                id serial primary key not null,
+                name varchar(50) not null,
+                surname varchar(50) not null
+            )
+            """;
     private static final String SAVE_SQL = """
-                insert into library.author (name, surname)
+                insert into author (name, surname)
                 values (?, ?)
             """;
     private static final String UPDATE_SQL = """
-            update library.author
+            update author
             set name = ?,
                 surname = ?
             where id = ?;
             """;
     private static final String DELETE_SQL = """
-                delete from library.author
+                delete from author
                 where id = ?
             """;
     private static final String FIND_BY_ID_SQL = """
-                select library.author.id, library.author.name, library.author.surname, library.book.id, library.book.title,
-                       library.book.page_count, library.book.author_id
-                from library.author left join library.book on author.id = library.book.author_id
-                where library.author.id = ?
+                select author.id, author.name, author.surname, book.id, book.title,
+                       book.page_count, book.author_id
+                from author left join book on author.id = book.author_id
+                where author.id = ?
             """;
     private static final String FIND_ALL_AUTHORS_SQL = """
-                select library.author.id, library.author.name, library.author.surname
-                from library.author
+                select author.id, author.name, author.surname
+                from author
             """;
+
 
     @Override
     public Author save(Author author) {
@@ -147,5 +155,15 @@ public class AuthorDao implements AuthorRepository {
     }
 
     private AuthorDao() {
+        prepareDatabase();
+    }
+
+    private void prepareDatabase() {
+        try (var connection = ConnectionManager.get();
+             var statement = connection.prepareStatement(CREATE_TABLE_IF_NOT_EXISTS_SQL)) {
+            statement.execute();
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
     }
 }
