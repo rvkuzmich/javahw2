@@ -1,6 +1,7 @@
 package kuzmich.dto;
 
 import java.util.List;
+import java.util.Objects;
 
 public class AuthorDto {
     private long id;
@@ -9,21 +10,6 @@ public class AuthorDto {
     private List<BookDto> bookDtoList;
 
     public AuthorDto() {
-    }
-
-    public AuthorDto(long id, String name, String surname) {
-        this.id = id;
-        this.name = name;
-        this.surname = surname;
-    }
-
-    public AuthorDto(long id) {
-        this.id = id;
-    }
-
-    public AuthorDto(String name, String surname) {
-        this.name = name;
-        this.surname = surname;
     }
 
     public AuthorDto(long id, String name, String surname, List<BookDto> bookDtoList) {
@@ -73,5 +59,17 @@ public class AuthorDto {
                ", surname='" + surname + '\'' +
                ", bookDtoList=" + bookDtoList +
                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof AuthorDto)) return false;
+        AuthorDto authorDto = (AuthorDto) o;
+        return id == authorDto.id && Objects.equals(name, authorDto.name) && Objects.equals(surname, authorDto.surname);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, surname);
     }
 }

@@ -2,6 +2,8 @@ package kuzmich.dto;
 
 import kuzmich.entity.Author;
 
+import java.util.Objects;
+
 public class BookDto {
     private long id;
     private String title;
@@ -9,12 +11,6 @@ public class BookDto {
     private Author author;
 
     public BookDto() {
-    }
-
-    public BookDto(String title, int pageCount, Author author) {
-        this.title = title;
-        this.pageCount = pageCount;
-        this.author = author;
     }
 
     public BookDto(long id, String title, int pageCount, Author author) {
@@ -64,6 +60,18 @@ public class BookDto {
                ", pageCount=" + pageCount +
                ", authorName=" + author.getName() +
                ", authorSurname=" + author.getSurname() +
-               '}';
+               "}";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof BookDto)) return false;
+        BookDto bookDto = (BookDto) o;
+        return id == bookDto.id && pageCount == bookDto.pageCount && Objects.equals(title, bookDto.title);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, title, pageCount);
     }
 }
