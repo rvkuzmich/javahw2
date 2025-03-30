@@ -13,6 +13,10 @@ public class Author {
     public Author() {
     }
 
+    public Author(long id) {
+        this.id = id;
+    }
+
     public Author(String name, String surname) {
         this.name = name;
         this.surname = surname;
@@ -24,8 +28,11 @@ public class Author {
         this.surname = surname;
     }
 
-    public Author(long id) {
+    public Author(long id, String name, String surname, List<Book> bookList) {
         this.id = id;
+        this.name = name;
+        this.surname = surname;
+        this.bookList = bookList;
     }
 
     public long getId() {

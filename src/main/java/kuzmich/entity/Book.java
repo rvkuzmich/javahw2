@@ -85,7 +85,8 @@ public class Book {
                "id=" + id +
                ", title='" + title + '\'' +
                ", pageCount=" + pageCount +
-               ", author=" + author +
-               '}';
+               ", authorName=" + author.getName() +
+               ", authorSurname=" + author.getSurname() +
+               "}";
     }
 }
