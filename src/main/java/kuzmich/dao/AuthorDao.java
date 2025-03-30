@@ -22,7 +22,13 @@ public class AuthorDao implements AuthorRepository {
                 id serial primary key not null,
                 name varchar(50) not null,
                 surname varchar(50) not null
-            )
+            );
+            create table if not exists book(
+                id serial primary key not null,
+                title varchar(50) not null,
+                page_count int not null,
+                author_id int not null references author(id)
+            );
             """;
     private static final String SAVE_SQL = """
                 insert into author (name, surname)
@@ -151,14 +157,14 @@ public class AuthorDao implements AuthorRepository {
     }
 
     public static AuthorDao getInstance() {
+        createTableIfNotExists();
         return INSTANCE;
     }
 
     private AuthorDao() {
-        prepareDatabase();
     }
 
-    private void prepareDatabase() {
+    private static void createTableIfNotExists() {
         try (var connection = ConnectionManager.get();
              var statement = connection.prepareStatement(CREATE_TABLE_IF_NOT_EXISTS_SQL)) {
             statement.execute();
