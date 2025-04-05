@@ -1,0 +1,12 @@
+kuzmich\exception\SqlConnectionExceptionTest.class
+kuzmich\dao\BookDaoTest.class
+kuzmich\service\BookServiceTest.class
+kuzmich\dao\AuthorDaoTest.class
+kuzmich\servlet\BookServletTest.class
+kuzmich\servlet\AuthorServletTest.class
+kuzmich\entity\BookTest.class
+kuzmich\entity\AuthorTest.class
+kuzmich\service\AuthorServiceTest.class
+kuzmich\exception\DaoExceptionTest.class
+kuzmich\dto\AuthorDtoTest.class
+kuzmich\dto\BookDtoTest.class

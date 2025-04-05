@@ -18,6 +18,8 @@ public class BookServlet extends HttpServlet {
     private static final String TITLE_PARAMETER = "title";
     private static final String PAGE_COUNT_PARAMETER = "page_count";
     private static final String AUTHOR_ID_PARAMETER = "author_id";
+    private static final String BAD_REQUEST_RESPONSE = "Bad Request";
+    private static final String NOT_FOUND_RESPONSE = "Not Found";
 
     private final transient BookService bookService;
 
@@ -37,21 +39,35 @@ public class BookServlet extends HttpServlet {
         try (PrintWriter out = resp.getWriter()) {
             if (req.getRequestURI().equals("/books") || req.getRequestURI().equals("/books/")) {
                 List<BookDto> books = bookService.findAll();
+                if (books.isEmpty()) {
+                    resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    out.write(NOT_FOUND_RESPONSE);
+                    return;
+                }
                 String json = mapper.writeValueAsString(books);
+                resp.setStatus(HttpServletResponse.SC_OK);
                 out.write(json);
             } else {
                 String pathInfo = req.getPathInfo();
                 String[] parts = pathInfo.split("/");
-                if (isNumeric(parts[1])) {
-                    long bookId = Long.parseLong(parts[1]);
-                    BookDto book = bookService.findById(bookId);
-                    String json = mapper.writeValueAsString(book);
-                    out.write(json);
-                } else {
-                    out.write("Некорректный идентификатор книги");
+                if (!isNumeric(parts[1])) {
+                    resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    out.write(BAD_REQUEST_RESPONSE);
+                    return;
                 }
+                long bookId = Long.parseLong(parts[1]);
+                BookDto book = bookService.findById(bookId);
+                if (book == null) {
+                    resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    out.write(NOT_FOUND_RESPONSE);
+                    return;
+                }
+                String json = mapper.writeValueAsString(book);
+                resp.setStatus(HttpServletResponse.SC_OK);
+                out.write(json);
             }
-        } catch (IOException e) {
+        } catch (
+                IOException e) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
@@ -72,13 +88,17 @@ public class BookServlet extends HttpServlet {
                     return;
                 }
                 if (isNumeric(req.getParameter(AUTHOR_ID_PARAMETER))) {
-                    bookDto.setAuthor(new Author(Long.parseLong(req.getParameter(AUTHOR_ID_PARAMETER))));
+                    Author author = new Author();
+                    author.setId(Long.parseLong(req.getParameter(AUTHOR_ID_PARAMETER)));
+                    bookDto.setAuthor(author);
                 }
                 bookDto = bookService.save(bookDto);
                 ObjectMapper mapper = new ObjectMapper();
                 String json = mapper.writeValueAsString(bookDto);
+                resp.setStatus(HttpServletResponse.SC_CREATED);
                 out.write(json);
             } else {
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 out.write("Некорректные параметры книги");
             }
         } catch (IOException e) {
@@ -96,10 +116,13 @@ public class BookServlet extends HttpServlet {
                 long bookId = Long.parseLong(parts[1]);
                 boolean res = bookService.delete(bookId);
                 if (res) {
-                    out.print("Книга успешно удалена");
+                    resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
                 } else {
-                    out.print("Книги с таким идентификатором не существует");
+                    resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 }
+            } else {
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                out.print(BAD_REQUEST_RESPONSE);
             }
         } catch (IOException e) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -112,28 +135,29 @@ public class BookServlet extends HttpServlet {
         try (PrintWriter out = resp.getWriter()) {
             String pathInfo = req.getPathInfo();
             String[] parts = pathInfo.split("/");
-            if (isNumeric(parts[1])) {
-                long bookId = Long.parseLong(parts[1]);
-                BookDto bookDto = new BookDto();
-                if (!req.getParameter(TITLE_PARAMETER).isBlank()
-                    && !req.getParameter(PAGE_COUNT_PARAMETER).isBlank()
-                    && !req.getParameter(AUTHOR_ID_PARAMETER).isBlank()) {
-                    bookDto.setId(bookId);
-                    bookDto.setTitle(req.getParameter(TITLE_PARAMETER));
-                    if (isNumeric(req.getParameter(PAGE_COUNT_PARAMETER))
-                        && isNumeric(req.getParameter(AUTHOR_ID_PARAMETER))) {
-                        bookDto.setPageCount(Integer.parseInt(req.getParameter(PAGE_COUNT_PARAMETER)));
-                        bookDto.setAuthor(new Author(Long.parseLong(req.getParameter(AUTHOR_ID_PARAMETER))));
-                    } else {
-                        out.write("Некорректный параметр страниц книги или id автора");
-                    }
-                    boolean res = bookService.update(bookDto);
-                    if (res) {
-                        out.print("Книга успешно обновлена");
-                    } else {
-                        out.print("Некорректный идентификатор книги");
-                    }
-                }
+            if (!isNumeric(parts[1])
+                || req.getParameter(TITLE_PARAMETER) == null
+                || req.getParameter(TITLE_PARAMETER).isEmpty()
+                || req.getParameter(PAGE_COUNT_PARAMETER) == null
+                || req.getParameter(PAGE_COUNT_PARAMETER).isEmpty()
+                || req.getParameter(AUTHOR_ID_PARAMETER) == null
+                || req.getParameter(AUTHOR_ID_PARAMETER).isEmpty()) {
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                return;
+            }
+            long bookId = Long.parseLong(parts[1]);
+            BookDto bookDto = new BookDto();
+            bookDto.setId(bookId);
+            bookDto.setId(bookId);
+            bookDto.setTitle(req.getParameter(TITLE_PARAMETER));
+            bookDto.setPageCount(Integer.parseInt(req.getParameter(PAGE_COUNT_PARAMETER)));
+            bookDto.setAuthor(new Author(Long.parseLong(req.getParameter(AUTHOR_ID_PARAMETER))));
+            boolean res = bookService.update(bookDto);
+            if (res) {
+                resp.setStatus(HttpServletResponse.SC_OK);
+                out.print("Книга успешно обновлена");
+            } else {
+                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             }
         } catch (IOException e) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

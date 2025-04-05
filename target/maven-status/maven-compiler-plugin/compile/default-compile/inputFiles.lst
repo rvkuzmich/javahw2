@@ -1,0 +1,17 @@
+D:\projects\aston\javahw2\src\main\java\kuzmich\dao\AuthorDao.java
+D:\projects\aston\javahw2\src\main\java\kuzmich\dao\BookDao.java
+D:\projects\aston\javahw2\src\main\java\kuzmich\dto\AuthorDto.java
+D:\projects\aston\javahw2\src\main\java\kuzmich\dto\BookDto.java
+D:\projects\aston\javahw2\src\main\java\kuzmich\entity\Author.java
+D:\projects\aston\javahw2\src\main\java\kuzmich\entity\Book.java
+D:\projects\aston\javahw2\src\main\java\kuzmich\exception\DaoException.java
+D:\projects\aston\javahw2\src\main\java\kuzmich\exception\SqlConnectionException.java
+D:\projects\aston\javahw2\src\main\java\kuzmich\Main.java
+D:\projects\aston\javahw2\src\main\java\kuzmich\repositiory\AuthorRepository.java
+D:\projects\aston\javahw2\src\main\java\kuzmich\repositiory\BookRepository.java
+D:\projects\aston\javahw2\src\main\java\kuzmich\service\AuthorService.java
+D:\projects\aston\javahw2\src\main\java\kuzmich\service\BookService.java
+D:\projects\aston\javahw2\src\main\java\kuzmich\servlet\AuthorServlet.java
+D:\projects\aston\javahw2\src\main\java\kuzmich\servlet\BookServlet.java
+D:\projects\aston\javahw2\src\main\java\kuzmich\utils\ConnectionManager.java
+D:\projects\aston\javahw2\src\main\java\kuzmich\utils\PropertiesUtil.java

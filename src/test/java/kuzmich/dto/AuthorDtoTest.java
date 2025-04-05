@@ -26,6 +26,14 @@ class AuthorDtoTest {
     }
 
     @Test
+    void constructorTest() {
+        AuthorDto dto = new AuthorDto(1L, "Name", "Surname", new ArrayList<>());
+        assertNotNull(dto);
+        AuthorDto dto2 = new AuthorDto(1L, "Name", "Surname");
+        assertNotNull(dto2);
+    }
+
+    @Test
     void getId() {
         long expectedId = 1L;
         assertEquals(expectedId, dto.getId());

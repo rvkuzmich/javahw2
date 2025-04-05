@@ -1,5 +1,6 @@
 package kuzmich.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -26,6 +27,7 @@ public class Author {
         this.id = id;
         this.name = name;
         this.surname = surname;
+        this.bookList = new ArrayList<>();
     }
 
     public Author(long id, String name, String surname, List<Book> bookList) {

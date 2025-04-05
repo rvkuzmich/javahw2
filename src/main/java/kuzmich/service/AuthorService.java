@@ -14,6 +14,10 @@ import java.util.stream.Collectors;
 public class AuthorService {
     private final AuthorDao authorDao;
 
+    public AuthorService(AuthorDao authorDao) {
+        this.authorDao = authorDao;
+    }
+
     public AuthorService() {
         this.authorDao = AuthorDao.getInstance();
     }

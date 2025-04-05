@@ -1,0 +1,12 @@
+D:\projects\aston\javahw2\src\test\java\kuzmich\dao\AuthorDaoTest.java
+D:\projects\aston\javahw2\src\test\java\kuzmich\dao\BookDaoTest.java
+D:\projects\aston\javahw2\src\test\java\kuzmich\dto\AuthorDtoTest.java
+D:\projects\aston\javahw2\src\test\java\kuzmich\dto\BookDtoTest.java
+D:\projects\aston\javahw2\src\test\java\kuzmich\entity\AuthorTest.java
+D:\projects\aston\javahw2\src\test\java\kuzmich\entity\BookTest.java
+D:\projects\aston\javahw2\src\test\java\kuzmich\exception\DaoExceptionTest.java
+D:\projects\aston\javahw2\src\test\java\kuzmich\exception\SqlConnectionExceptionTest.java
+D:\projects\aston\javahw2\src\test\java\kuzmich\service\AuthorServiceTest.java
+D:\projects\aston\javahw2\src\test\java\kuzmich\service\BookServiceTest.java
+D:\projects\aston\javahw2\src\test\java\kuzmich\servlet\AuthorServletTest.java
+D:\projects\aston\javahw2\src\test\java\kuzmich\servlet\BookServletTest.java

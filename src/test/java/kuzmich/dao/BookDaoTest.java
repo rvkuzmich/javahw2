@@ -2,10 +2,13 @@ package kuzmich.dao;
 
 import kuzmich.entity.Author;
 import kuzmich.entity.Book;
-import kuzmich.utils.ConnectionManager;
+import kuzmich.utils.PropertiesUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.util.List;
@@ -15,14 +18,23 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BookDaoTest {
 
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
-    static BookDao bookDao;
-    static AuthorDao authorDao;
+    private static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
+    private static BookDao bookDao;
+    private static AuthorDao authorDao;
+    private static MockedStatic<PropertiesUtil> propertiesUtilMockedStatic;
 
     @BeforeAll
     static void beforeAll() {
         postgres.start();
-        ConnectionManager.setConnectionForTests(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
+        propertiesUtilMockedStatic = Mockito.mockStatic(PropertiesUtil.class);
+        Mockito.when(PropertiesUtil.get("db.driver")).thenReturn(postgres.getDriverClassName());
+        Mockito.when(PropertiesUtil.get("db.url")).thenReturn(postgres.getJdbcUrl());
+        Mockito.when(PropertiesUtil.get("db.username")).thenReturn(postgres.getUsername());
+        Mockito.when(PropertiesUtil.get("db.password")).thenReturn(postgres.getPassword());
+    }
+
+    @BeforeEach
+    void beforeEach() {
         bookDao = BookDao.getInstance();
         authorDao = AuthorDao.getInstance();
     }
@@ -32,12 +44,13 @@ class BookDaoTest {
         bookDao = null;
         authorDao = null;
         postgres.stop();
+        propertiesUtilMockedStatic.close();
     }
 
     @Test
     void save() {
-        Author expectedAuthor = authorDao.save(new Author("Иван", "Иванов"));
-        Book expectedBook = new Book("Название", 25, expectedAuthor);
+        Author expectedAuthor = authorDao.save(new Author("Лев", "Толстой"));
+        Book expectedBook = new Book("Метель", 25, expectedAuthor);
 
         Book actualBook = bookDao.save(expectedBook);
         assertEquals(expectedBook, actualBook);

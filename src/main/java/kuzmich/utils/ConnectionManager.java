@@ -7,7 +7,7 @@ import kuzmich.exception.SqlConnectionException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public final class ConnectionManager {
+public class ConnectionManager {
     private static final String DRIVER_KEY = "db.driver";
     private static final String URL_KEY = "db.url";
     private static final String USERNAME_KEY = "db.username";
@@ -35,13 +35,13 @@ public final class ConnectionManager {
         }
     }
 
-    public static void setConnectionForTests(String url, String username, String password) {
-        HikariConfig config = new HikariConfig();
-        config.setJdbcUrl(url);
-        config.setUsername(username);
-        config.setPassword(password);
-        dataSource = new HikariDataSource(config);
-    }
+//    public static void setConnectionForTests(String url, String username, String password) {
+//        HikariConfig config = new HikariConfig();
+//        config.setJdbcUrl(url);
+//        config.setUsername(username);
+//        config.setPassword(password);
+//        dataSource = new HikariDataSource(config);
+//    }
 
     private ConnectionManager() {
     }

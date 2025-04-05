@@ -15,24 +15,31 @@ public class BookService {
     private final BookDao bookDao;
     private final AuthorDao authorDao;
 
+    public BookService(BookDao bookDao, AuthorDao authorDao) {
+        this.bookDao = bookDao;
+        this.authorDao = authorDao;
+    }
+
     public BookService() {
         this.bookDao = BookDao.getInstance();
         this.authorDao = AuthorDao.getInstance();
     }
 
     public BookDto save(BookDto bookDto) {
-        Optional<Author> authorOptional = authorDao.findById(bookDto.getAuthor().getId());
-        Author author = null;
-        if (authorOptional.isPresent()) {
-            author = authorOptional.get();
-        }
-        Book book = bookDao.save(new Book(bookDto.getTitle(), bookDto.getPageCount(), author));
-        return mapToBookDto(book);
+        Book savedBook = bookDao.save(mapToBook(bookDto));
+        Optional<Author> authorOptional = authorDao.findById(savedBook.getAuthor().getId());
+        savedBook.setAuthor(authorOptional.orElse(null));
+        return mapToBookDto(savedBook);
     }
 
     public boolean update(BookDto bookDto) {
-        Book book = mapToBook(bookDto);
-        return bookDao.update(book);
+
+        Optional<Book> book = bookDao.findById(bookDto.getId());
+        Book bookToUpdate;
+        if (book.isPresent()) {
+            bookToUpdate = book.get();
+        } else return false;
+        return bookDao.update(bookToUpdate);
     }
 
     public boolean delete(long id) {

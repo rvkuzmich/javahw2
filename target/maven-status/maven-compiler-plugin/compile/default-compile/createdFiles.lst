@@ -1,0 +1,17 @@
+kuzmich\exception\SqlConnectionException.class
+kuzmich\utils\ConnectionManager.class
+kuzmich\repositiory\AuthorRepository.class
+kuzmich\dao\AuthorDao.class
+kuzmich\repositiory\BookRepository.class
+kuzmich\servlet\BookServlet.class
+kuzmich\entity\Book.class
+kuzmich\dto\BookDto.class
+kuzmich\entity\Author.class
+kuzmich\service\AuthorService.class
+kuzmich\dto\AuthorDto.class
+kuzmich\service\BookService.class
+kuzmich\Main.class
+kuzmich\dao\BookDao.class
+kuzmich\servlet\AuthorServlet.class
+kuzmich\utils\PropertiesUtil.class
+kuzmich\exception\DaoException.class

@@ -1,5 +1,6 @@
 package kuzmich.dto;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -17,6 +18,19 @@ public class AuthorDto {
         this.name = name;
         this.surname = surname;
         this.bookDtoList = bookDtoList;
+    }
+
+    public AuthorDto(long id, String name, String surname) {
+        this.id = id;
+        this.name = name;
+        this.surname = surname;
+        this.bookDtoList = new ArrayList<>();
+    }
+
+    public AuthorDto(String name, String surname) {
+        this.name = name;
+        this.surname = surname;
+        this.bookDtoList = new ArrayList<>();
     }
 
     public long getId() {

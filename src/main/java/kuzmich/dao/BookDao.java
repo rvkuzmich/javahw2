@@ -15,7 +15,7 @@ import java.util.Optional;
 
 public class BookDao implements BookRepository {
     private static final BookDao INSTANCE = new BookDao();
-    private static final String CREATE_TABLE_IF_NOT_EXISTS_SQL = """
+    private static final String PREPARE_DATABASE_SQL = """
             create table if not exists author(
                 id serial primary key not null,
                 name varchar(50) not null,
@@ -27,6 +27,8 @@ public class BookDao implements BookRepository {
                 page_count int not null,
                 author_id int not null references author(id)
             );
+            truncate author restart identity cascade;
+            truncate book restart identity;
             """;
     private static final String SAVE_SQL = """
             insert into book (title, page_count, author_id)
@@ -140,16 +142,16 @@ public class BookDao implements BookRepository {
     }
 
     public static BookDao getInstance() {
-        createTableIfNotExists();
+        prepareDatabase();
         return INSTANCE;
     }
 
     private BookDao() {
     }
 
-    private static void createTableIfNotExists() {
+    private static void prepareDatabase() {
         try (var connection = ConnectionManager.get();
-             var statement = connection.prepareStatement(CREATE_TABLE_IF_NOT_EXISTS_SQL)) {
+             var statement = connection.prepareStatement(PREPARE_DATABASE_SQL)) {
             statement.execute();
         } catch (SQLException e) {
             throw new DaoException(e);

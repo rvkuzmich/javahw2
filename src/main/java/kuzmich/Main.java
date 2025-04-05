@@ -8,9 +8,7 @@ import kuzmich.service.BookService;
 
 public class Main {
     public static void main(String[] args) {
-        AuthorService authorService = new AuthorService();
-        BookService bookService = new BookService();
-        System.out.println(authorService.findAll());
-        System.out.println(bookService.update(new BookDto(6L, "Первый", 13,new Author(3))));
+        AuthorDao authorDao = AuthorDao.getInstance();
+        System.out.println(authorDao.delete(1L));
     }
 }

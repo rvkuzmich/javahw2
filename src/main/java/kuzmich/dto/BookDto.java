@@ -20,6 +20,12 @@ public class BookDto {
         this.author = author;
     }
 
+    public BookDto(String title, int pageCount, Author author) {
+        this.title = title;
+        this.pageCount = pageCount;
+        this.author = author;
+    }
+
     public long getId() {
         return id;
     }

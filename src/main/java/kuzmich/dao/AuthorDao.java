@@ -17,7 +17,8 @@ public class AuthorDao implements AuthorRepository {
 
     private static final AuthorDao INSTANCE = new AuthorDao();
     private static final String AUTHOR_SURNAME_COLUMN_LABEL = "surname";
-    private static final String CREATE_TABLE_IF_NOT_EXISTS_SQL = """
+    private static final String BOOK_ID_COLUMN_LABEL = "book_id";
+    private static final String PREPARE_DATABASE_SQL = """
             create table if not exists author(
                 id serial primary key not null,
                 name varchar(50) not null,
@@ -29,6 +30,8 @@ public class AuthorDao implements AuthorRepository {
                 page_count int not null,
                 author_id int not null references author(id)
             );
+            truncate author restart identity cascade;
+            truncate book restart identity;
             """;
     private static final String SAVE_SQL = """
                 insert into author (name, surname)
@@ -42,10 +45,10 @@ public class AuthorDao implements AuthorRepository {
             """;
     private static final String DELETE_SQL = """
                 delete from author
-                where id = ?
+                where id = ?;
             """;
     private static final String FIND_BY_ID_SQL = """
-                select author.id, author.name, author.surname, book.id, book.title,
+                select author.id, author.name, author.surname, book.id as book_id, book.title,
                        book.page_count, book.author_id
                 from author left join book on author.id = book.author_id
                 where author.id = ?
@@ -111,9 +114,12 @@ public class AuthorDao implements AuthorRepository {
                             resultSet.getString("name"),
                             resultSet.getString(AUTHOR_SURNAME_COLUMN_LABEL));
                 }
-                books.add(new Book(resultSet.getLong("id"),
-                        resultSet.getString("title"),
-                        resultSet.getInt("page_count")));
+                if (resultSet.getString(BOOK_ID_COLUMN_LABEL) != null) {
+                    Book book = new Book(resultSet.getLong(BOOK_ID_COLUMN_LABEL),
+                            resultSet.getString("title"),
+                            resultSet.getInt("page_count"));
+                    books.add(book);
+                }
             }
             if (author != null) {
                 author.setBookList(books);
@@ -146,7 +152,7 @@ public class AuthorDao implements AuthorRepository {
                 ResultSet resultSet = statement.executeQuery();
                 while (resultSet.next()) {
                     if (author.getId() == resultSet.getLong("author_id")) {
-                        author.getBookList().add(new Book(resultSet.getString("title"), resultSet.getInt("page_count")));
+                        author.getBookList().add(new Book(resultSet.getLong(BOOK_ID_COLUMN_LABEL), resultSet.getString("title"), resultSet.getInt("page_count")));
                     }
                 }
             }
@@ -157,16 +163,16 @@ public class AuthorDao implements AuthorRepository {
     }
 
     public static AuthorDao getInstance() {
-        createTableIfNotExists();
+        prepareDatabase();
         return INSTANCE;
     }
 
     private AuthorDao() {
     }
 
-    private static void createTableIfNotExists() {
+    private static void prepareDatabase() {
         try (var connection = ConnectionManager.get();
-             var statement = connection.prepareStatement(CREATE_TABLE_IF_NOT_EXISTS_SQL)) {
+             var statement = connection.prepareStatement(PREPARE_DATABASE_SQL)) {
             statement.execute();
         } catch (SQLException e) {
             throw new DaoException(e);
