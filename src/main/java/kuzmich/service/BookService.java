@@ -2,7 +2,6 @@ package kuzmich.service;
 
 import kuzmich.dao.AuthorDao;
 import kuzmich.dao.BookDao;
-import kuzmich.dto.AuthorDto;
 import kuzmich.dto.BookDto;
 import kuzmich.entity.Author;
 import kuzmich.entity.Book;
@@ -35,10 +34,10 @@ public class BookService {
     public boolean update(BookDto bookDto) {
 
         Optional<Book> book = bookDao.findById(bookDto.getId());
-        Book bookToUpdate;
-        if (book.isPresent()) {
-            bookToUpdate = book.get();
-        } else return false;
+        Optional<Author> authorOptional = authorDao.findById(bookDto.getAuthor().getId());
+        Book bookToUpdate = mapToBook(bookDto);
+        if (book.isEmpty() || authorOptional.isEmpty()) return false;
+
         return bookDao.update(bookToUpdate);
     }
 

@@ -17,8 +17,6 @@ public class AuthorServlet extends HttpServlet {
     private static final String CONTENT_TYPE_JSON = "application/json; charset=UTF-8";
     private static final String NAME_PARAMETER = "name";
     private static final String SURNAME_PARAMETER = "surname";
-    private static final String BAD_REQUEST_RESPONSE = "Bad Request";
-    private static final String NOT_FOUND_RESPONSE = "Not Found";
 
     private final transient AuthorService authorService;
 
@@ -40,7 +38,6 @@ public class AuthorServlet extends HttpServlet {
                 List<AuthorDto> authors = authorService.findAll();
                 if (authors.isEmpty()) {
                     resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    out.write(NOT_FOUND_RESPONSE);
                     return;
                 }
                 resp.setStatus(HttpServletResponse.SC_OK);
@@ -51,14 +48,12 @@ public class AuthorServlet extends HttpServlet {
                 String[] parts = pathInfo.split("/");
                 if (isNotNumeric(parts[1])) {
                     resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    out.write(BAD_REQUEST_RESPONSE);
                     return;
                 }
                 long authorId = Long.parseLong(parts[1]);
                 AuthorDto author = authorService.findById(authorId);
                 if (author == null) {
                     resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    out.write(NOT_FOUND_RESPONSE);
                     return;
                 }
                 String json = mapper.writeValueAsString(author);
@@ -78,7 +73,6 @@ public class AuthorServlet extends HttpServlet {
             if (req.getParameter(NAME_PARAMETER) == null || req.getParameter(NAME_PARAMETER).isEmpty()
                 || req.getParameter(SURNAME_PARAMETER) == null || req.getParameter(SURNAME_PARAMETER).isEmpty()) {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                out.write(BAD_REQUEST_RESPONSE);
                 return;
             }
             authorDto.setName(req.getParameter(NAME_PARAMETER));
@@ -101,7 +95,6 @@ public class AuthorServlet extends HttpServlet {
             String[] parts = pathInfo.split("/");
             if (isNotNumeric(parts[1])) {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                out.write(BAD_REQUEST_RESPONSE);
                 return;
             }
             long authorId = Long.parseLong(parts[1]);
@@ -128,7 +121,6 @@ public class AuthorServlet extends HttpServlet {
                 || req.getParameter(SURNAME_PARAMETER) == null
                 || req.getParameter(SURNAME_PARAMETER).isEmpty()) {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                out.write(BAD_REQUEST_RESPONSE);
                 return;
             }
             long authorId = Long.parseLong(parts[1]);
@@ -141,7 +133,6 @@ public class AuthorServlet extends HttpServlet {
 
             if (res) {
                 resp.setStatus(HttpServletResponse.SC_OK);
-                out.write("Author updated");
             } else {
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             }

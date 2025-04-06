@@ -18,8 +18,7 @@ public class BookServlet extends HttpServlet {
     private static final String TITLE_PARAMETER = "title";
     private static final String PAGE_COUNT_PARAMETER = "page_count";
     private static final String AUTHOR_ID_PARAMETER = "author_id";
-    private static final String BAD_REQUEST_RESPONSE = "Bad Request";
-    private static final String NOT_FOUND_RESPONSE = "Not Found";
+
 
     private final transient BookService bookService;
 
@@ -41,7 +40,6 @@ public class BookServlet extends HttpServlet {
                 List<BookDto> books = bookService.findAll();
                 if (books.isEmpty()) {
                     resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    out.write(NOT_FOUND_RESPONSE);
                     return;
                 }
                 String json = mapper.writeValueAsString(books);
@@ -52,14 +50,12 @@ public class BookServlet extends HttpServlet {
                 String[] parts = pathInfo.split("/");
                 if (!isNumeric(parts[1])) {
                     resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    out.write(BAD_REQUEST_RESPONSE);
                     return;
                 }
                 long bookId = Long.parseLong(parts[1]);
                 BookDto book = bookService.findById(bookId);
                 if (book == null) {
                     resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    out.write(NOT_FOUND_RESPONSE);
                     return;
                 }
                 String json = mapper.writeValueAsString(book);
@@ -77,30 +73,27 @@ public class BookServlet extends HttpServlet {
         resp.setContentType(CONTENT_TYPE_JSON);
         BookDto bookDto = new BookDto();
         try (PrintWriter out = resp.getWriter()) {
-            if (!req.getParameter(TITLE_PARAMETER).isBlank()
-                && !req.getParameter(PAGE_COUNT_PARAMETER).isBlank()
-                && !req.getParameter(AUTHOR_ID_PARAMETER).isBlank()) {
-                bookDto.setTitle(req.getParameter(TITLE_PARAMETER));
-                if (isNumeric(req.getParameter(PAGE_COUNT_PARAMETER))) {
-                    bookDto.setPageCount(Integer.parseInt(req.getParameter(PAGE_COUNT_PARAMETER)));
-                } else {
-                    out.write("Некорректный параметр страниц книги");
-                    return;
-                }
-                if (isNumeric(req.getParameter(AUTHOR_ID_PARAMETER))) {
-                    Author author = new Author();
-                    author.setId(Long.parseLong(req.getParameter(AUTHOR_ID_PARAMETER)));
-                    bookDto.setAuthor(author);
-                }
-                bookDto = bookService.save(bookDto);
-                ObjectMapper mapper = new ObjectMapper();
-                String json = mapper.writeValueAsString(bookDto);
-                resp.setStatus(HttpServletResponse.SC_CREATED);
-                out.write(json);
-            } else {
+            if (req.getParameter(TITLE_PARAMETER) == null
+                || req.getParameter(TITLE_PARAMETER).isEmpty()
+                || req.getParameter(AUTHOR_ID_PARAMETER) == null
+                || req.getParameter(AUTHOR_ID_PARAMETER).isEmpty()
+                || req.getParameter(PAGE_COUNT_PARAMETER) == null
+                || req.getParameter(PAGE_COUNT_PARAMETER).isEmpty()
+                || !isNumeric(req.getParameter(PAGE_COUNT_PARAMETER))
+                || !isNumeric(req.getParameter(AUTHOR_ID_PARAMETER))){
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                out.write("Некорректные параметры книги");
+                return;
             }
+            bookDto.setTitle(req.getParameter(TITLE_PARAMETER));
+            bookDto.setPageCount(Integer.parseInt(req.getParameter(PAGE_COUNT_PARAMETER)));
+            Author author = new Author();
+            author.setId(Long.parseLong(req.getParameter(AUTHOR_ID_PARAMETER)));
+            bookDto.setAuthor(author);
+            bookDto = bookService.save(bookDto);
+            ObjectMapper mapper = new ObjectMapper();
+            String json = mapper.writeValueAsString(bookDto);
+            resp.setStatus(HttpServletResponse.SC_CREATED);
+            out.write(json);
         } catch (IOException e) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
@@ -122,7 +115,6 @@ public class BookServlet extends HttpServlet {
                 }
             } else {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                out.print(BAD_REQUEST_RESPONSE);
             }
         } catch (IOException e) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -136,6 +128,8 @@ public class BookServlet extends HttpServlet {
             String pathInfo = req.getPathInfo();
             String[] parts = pathInfo.split("/");
             if (!isNumeric(parts[1])
+                || !isNumeric(req.getParameter(PAGE_COUNT_PARAMETER))
+                || !isNumeric(req.getParameter(AUTHOR_ID_PARAMETER))
                 || req.getParameter(TITLE_PARAMETER) == null
                 || req.getParameter(TITLE_PARAMETER).isEmpty()
                 || req.getParameter(PAGE_COUNT_PARAMETER) == null
@@ -155,7 +149,6 @@ public class BookServlet extends HttpServlet {
             boolean res = bookService.update(bookDto);
             if (res) {
                 resp.setStatus(HttpServletResponse.SC_OK);
-                out.print("Книга успешно обновлена");
             } else {
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             }

@@ -30,8 +30,6 @@ public class AuthorDao implements AuthorRepository {
                 page_count int not null,
                 author_id int not null references author(id)
             );
-            truncate author restart identity cascade;
-            truncate book restart identity;
             """;
     private static final String SAVE_SQL = """
                 insert into author (name, surname)
