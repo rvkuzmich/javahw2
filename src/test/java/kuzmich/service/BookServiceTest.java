@@ -67,6 +67,7 @@ class BookServiceTest {
         boolean success = true;
         Mockito.when(bookDao.update(book)).thenReturn(success);
         Mockito.when(bookDao.findById(book.getId())).thenReturn(Optional.ofNullable(book));
+        Mockito.when(authorDao.findById(author.getId())).thenReturn(Optional.ofNullable(author));
         boolean updatedBook = bookService.update(bookDto);
         Mockito.verify(bookDao).update(book);
         assertTrue(updatedBook);
@@ -76,9 +77,9 @@ class BookServiceTest {
     void updateFailure() {
         boolean success = false;
         Mockito.when(bookDao.update(book)).thenReturn(success);
-        Mockito.when(bookDao.findById(book.getId())).thenReturn(Optional.ofNullable(book));
+        Mockito.when(bookDao.findById(book.getId())).thenReturn(Optional.empty());
+        Mockito.when(authorDao.findById(book.getAuthor().getId())).thenReturn(Optional.empty());
         boolean updatedBook = bookService.update(bookDto);
-        Mockito.verify(bookDao).update(book);
         assertFalse(updatedBook);
     }
 
