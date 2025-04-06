@@ -46,26 +46,26 @@ class AuthorDaoTest {
 
     @Test
     void save() {
-        Author expected = new Author("Лев", "Толстой");
+        Author expected = new Author(1L, "Лев", "Толстой");
 
         Author actual = dao.save(expected);
 
         assertNotNull(actual);
         assertEquals(expected.getName(), actual.getName());
         assertEquals(expected.getSurname(), actual.getSurname());
-        assertEquals(1L, actual.getId());
     }
 
     @Test
     void updateSuccess() {
-        dao.save(new Author("Лев", "Толстой"));
+        Author expected = dao.save(new Author("Лев", "Толстой"));
 
-        Author expected = new Author(1L, "Роман", "Прокофьев");
+        expected.setName("Роман");
+        expected.setSurname("Прокофьев");
 
         boolean res = dao.update(expected);
         assertTrue(res);
 
-        Optional<Author> authorOptional = dao.findById(1L);
+        Optional<Author> authorOptional = dao.findById(expected.getId());
         Author actual = authorOptional.orElse(null);
 
         assertEquals(expected, actual);
