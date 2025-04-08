@@ -2,10 +2,8 @@ package kuzmich.utils;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import kuzmich.exception.SqlConnectionException;
 
-import java.sql.Connection;
-import java.sql.SQLException;
+import javax.sql.DataSource;
 
 public class ConnectionManager {
     private static final String DRIVER_KEY = "db.driver";
@@ -27,21 +25,9 @@ public class ConnectionManager {
         dataSource = new HikariDataSource(config);
     }
 
-    public static Connection get() {
-        try {
-            return dataSource.getConnection();
-        } catch (SQLException e) {
-            throw new SqlConnectionException(e);
-        }
+    public static DataSource getDataSource() {
+            return dataSource;
     }
-
-//    public static void setConnectionForTests(String url, String username, String password) {
-//        HikariConfig config = new HikariConfig();
-//        config.setJdbcUrl(url);
-//        config.setUsername(username);
-//        config.setPassword(password);
-//        dataSource = new HikariDataSource(config);
-//    }
 
     private ConnectionManager() {
     }

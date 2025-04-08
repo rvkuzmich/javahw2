@@ -1,11 +1,13 @@
 package kuzmich.dao;
 
+import com.zaxxer.hikari.HikariDataSource;
 import kuzmich.entity.Author;
 import kuzmich.entity.Book;
 import kuzmich.exception.DaoException;
 import kuzmich.repositiory.AuthorRepository;
 import kuzmich.utils.ConnectionManager;
 
+import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -15,9 +17,12 @@ import java.util.Optional;
 
 public class AuthorDao implements AuthorRepository {
 
-    private static final AuthorDao INSTANCE = new AuthorDao();
     private static final String AUTHOR_SURNAME_COLUMN_LABEL = "surname";
     private static final String BOOK_ID_COLUMN_LABEL = "book_id";
+    private final DataSource dataSource;
+    private static final String CLEAR_TABLE_SQL = """
+            truncate author restart identity cascade
+            """;
     private static final String PREPARE_DATABASE_SQL = """
             create table if not exists author(
                 id serial primary key not null,
@@ -59,7 +64,7 @@ public class AuthorDao implements AuthorRepository {
 
     @Override
     public Author save(Author author) {
-        try (var connection = ConnectionManager.get();
+        try (var connection = dataSource.getConnection();
              var statement = connection.prepareStatement(SAVE_SQL, Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, author.getName());
             statement.setString(2, author.getSurname());
@@ -76,7 +81,7 @@ public class AuthorDao implements AuthorRepository {
 
     @Override
     public boolean update(Author author) {
-        try (var connection = ConnectionManager.get();
+        try (var connection = dataSource.getConnection();
              var statement = connection.prepareStatement(UPDATE_SQL)) {
             statement.setString(1, author.getName());
             statement.setString(2, author.getSurname());
@@ -89,7 +94,7 @@ public class AuthorDao implements AuthorRepository {
 
     @Override
     public boolean delete(long id) {
-        try (var connection = ConnectionManager.get();
+        try (var connection = dataSource.getConnection();
              var statement = connection.prepareStatement(DELETE_SQL)) {
             statement.setLong(1, id);
             return statement.executeUpdate() > 0;
@@ -100,7 +105,7 @@ public class AuthorDao implements AuthorRepository {
 
     @Override
     public Optional<Author> findById(long id) {
-        try (var connection = ConnectionManager.get();
+        try (var connection = dataSource.getConnection();
              var statement = connection.prepareStatement(FIND_BY_ID_SQL)) {
             statement.setLong(1, id);
             ResultSet resultSet = statement.executeQuery();
@@ -131,7 +136,7 @@ public class AuthorDao implements AuthorRepository {
     @Override
     public List<Author> findAll() {
         List<Author> authors = new ArrayList<>();
-        try (var connection = ConnectionManager.get();
+        try (var connection = dataSource.getConnection();
              var statement = connection.prepareStatement(FIND_ALL_AUTHORS_SQL)) {
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
@@ -142,7 +147,7 @@ public class AuthorDao implements AuthorRepository {
         } catch (SQLException e) {
             throw new DaoException(e);
         }
-        try (var connection = ConnectionManager.get();
+        try (var connection = dataSource.getConnection();
              var statement = connection.prepareStatement(FIND_BY_ID_SQL)) {
             for (Author author : authors) {
                 statement.setLong(1, author.getId());
@@ -160,17 +165,28 @@ public class AuthorDao implements AuthorRepository {
         return authors;
     }
 
-    public static AuthorDao getInstance() {
+    public AuthorDao() {
+        this.dataSource = ConnectionManager.getDataSource();
         prepareDatabase();
-        return INSTANCE;
     }
 
-    private AuthorDao() {
+    public AuthorDao(HikariDataSource dataSource) {
+        this.dataSource = dataSource;
+        prepareDatabase();
     }
 
-    private static void prepareDatabase() {
-        try (var connection = ConnectionManager.get();
+    private void prepareDatabase() {
+        try (var connection = dataSource.getConnection();
              var statement = connection.prepareStatement(PREPARE_DATABASE_SQL)) {
+            statement.execute();
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
+    }
+
+    public void clearTableForTest() {
+        try (var connection = dataSource.getConnection();
+             var statement = connection.prepareStatement(CLEAR_TABLE_SQL)) {
             statement.execute();
         } catch (SQLException e) {
             throw new DaoException(e);

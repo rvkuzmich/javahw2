@@ -1,11 +1,13 @@
 package kuzmich.dao;
 
+import com.zaxxer.hikari.HikariDataSource;
 import kuzmich.entity.Author;
 import kuzmich.entity.Book;
 import kuzmich.exception.DaoException;
 import kuzmich.repositiory.BookRepository;
 import kuzmich.utils.ConnectionManager;
 
+import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -14,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class BookDao implements BookRepository {
-    private static final BookDao INSTANCE = new BookDao();
+    private final DataSource dataSource;
     private static final String PREPARE_DATABASE_SQL = """
             create table if not exists author(
                 id serial primary key not null,
@@ -55,10 +57,13 @@ public class BookDao implements BookRepository {
             from book left join author on book.author_id = author.id
             order by book.id
             """;
+    private static final String CLEAR_TABLE_SQL = """
+            truncate book restart identity
+            """;
 
     @Override
     public Book save(Book book) {
-        try (var connection = ConnectionManager.get();
+        try (var connection = dataSource.getConnection();
              var statement = connection.prepareStatement(SAVE_SQL, Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, book.getTitle());
             statement.setInt(2, book.getPageCount());
@@ -76,7 +81,7 @@ public class BookDao implements BookRepository {
 
     @Override
     public boolean update(Book book) {
-        try (var connection = ConnectionManager.get();
+        try (var connection = dataSource.getConnection();
              var statement = connection.prepareStatement(UPDATE_SQL)) {
             statement.setString(1, book.getTitle());
             statement.setInt(2, book.getPageCount());
@@ -90,7 +95,7 @@ public class BookDao implements BookRepository {
 
     @Override
     public boolean delete(long id) {
-        try (var connection = ConnectionManager.get();
+        try (var connection = dataSource.getConnection();
              var statement = connection.prepareStatement(DELETE_SQL)) {
             statement.setLong(1, id);
             return statement.executeUpdate() > 0;
@@ -101,7 +106,7 @@ public class BookDao implements BookRepository {
 
     @Override
     public Optional<Book> findById(long id) {
-        try (var connection = ConnectionManager.get();
+        try (var connection = dataSource.getConnection();
              var statement = connection.prepareStatement(FIND_BY_ID_SQL)) {
             statement.setLong(1, id);
             ResultSet resultSet = statement.executeQuery();
@@ -117,7 +122,7 @@ public class BookDao implements BookRepository {
 
     @Override
     public List<Book> findAll() {
-        try (var connection = ConnectionManager.get();
+        try (var connection = dataSource.getConnection();
              var statement = connection.prepareStatement(FIND_ALL_SQL)) {
             List<Book> books = new ArrayList<>();
             ResultSet resultSet = statement.executeQuery();
@@ -139,17 +144,28 @@ public class BookDao implements BookRepository {
                         resultSet.getString("surname")));
     }
 
-    public static BookDao getInstance() {
+    public BookDao() {
+        this.dataSource = ConnectionManager.getDataSource();
         prepareDatabase();
-        return INSTANCE;
     }
 
-    private BookDao() {
+    public BookDao(HikariDataSource dataSource) {
+        this.dataSource = dataSource;
+        prepareDatabase();
     }
 
-    private static void prepareDatabase() {
-        try (var connection = ConnectionManager.get();
+    private void prepareDatabase() {
+        try (var connection = dataSource.getConnection();
              var statement = connection.prepareStatement(PREPARE_DATABASE_SQL)) {
+            statement.execute();
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
+    }
+
+    public void clearTableForTest() {
+        try (var connection = dataSource.getConnection();
+             var statement = connection.prepareStatement(CLEAR_TABLE_SQL)) {
             statement.execute();
         } catch (SQLException e) {
             throw new DaoException(e);

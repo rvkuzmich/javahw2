@@ -1,14 +1,13 @@
 package kuzmich.dao;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import kuzmich.entity.Author;
 import kuzmich.entity.Book;
-import kuzmich.utils.PropertiesUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.util.List;
@@ -18,25 +17,32 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BookDaoTest {
 
-    private static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
-    private static BookDao bookDao;
+    private static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine")
+            .withDatabaseName("test")
+            .withUsername("test")
+            .withPassword("test");
+    private static HikariDataSource ds;
     private static AuthorDao authorDao;
-    private static MockedStatic<PropertiesUtil> propertiesUtilMockedStatic;
+    private static BookDao bookDao;
 
     @BeforeAll
     static void beforeAll() {
         postgres.start();
-        propertiesUtilMockedStatic = Mockito.mockStatic(PropertiesUtil.class);
-        Mockito.when(PropertiesUtil.get("db.driver")).thenReturn(postgres.getDriverClassName());
-        Mockito.when(PropertiesUtil.get("db.url")).thenReturn(postgres.getJdbcUrl());
-        Mockito.when(PropertiesUtil.get("db.username")).thenReturn(postgres.getUsername());
-        Mockito.when(PropertiesUtil.get("db.password")).thenReturn(postgres.getPassword());
+
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(postgres.getJdbcUrl());
+        config.setUsername(postgres.getUsername());
+        config.setPassword(postgres.getPassword());
+        config.setDriverClassName(postgres.getDriverClassName());
+        ds = new HikariDataSource(config);
+        authorDao = new AuthorDao(ds);
+        bookDao = new BookDao(ds);
     }
 
     @BeforeEach
     void beforeEach() {
-        bookDao = BookDao.getInstance();
-        authorDao = AuthorDao.getInstance();
+        authorDao.clearTableForTest();
+        bookDao.clearTableForTest();
     }
 
     @AfterAll
@@ -44,7 +50,12 @@ class BookDaoTest {
         bookDao = null;
         authorDao = null;
         postgres.stop();
-        propertiesUtilMockedStatic.close();
+    }
+
+    @Test
+    void emptyConstructorTest() {
+        BookDao bookDao = new BookDao();
+        assertNotNull(bookDao);
     }
 
     @Test
@@ -113,9 +124,4 @@ class BookDaoTest {
         assertEquals(2, books.size());
     }
 
-    @Test
-    void getInstance() {
-        BookDao dao = BookDao.getInstance();
-        assertNotNull(dao);
-    }
 }

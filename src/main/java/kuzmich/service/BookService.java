@@ -20,8 +20,8 @@ public class BookService {
     }
 
     public BookService() {
-        this.bookDao = BookDao.getInstance();
-        this.authorDao = AuthorDao.getInstance();
+        this.bookDao = new BookDao();
+        this.authorDao = new AuthorDao();
     }
 
     public BookDto save(BookDto bookDto) {

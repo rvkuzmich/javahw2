@@ -19,7 +19,7 @@ public class AuthorService {
     }
 
     public AuthorService() {
-        this.authorDao = AuthorDao.getInstance();
+        this.authorDao = new AuthorDao();
     }
 
     public AuthorDto save(AuthorDto authorDto) {
