@@ -23,6 +23,10 @@ public final class PropertiesUtil {
         return PROPERTIES.getProperty(key);
     }
 
+    public static void set(String key, String value) {
+        PROPERTIES.setProperty(key, value);
+    }
+
     private PropertiesUtil() {
     }
 }

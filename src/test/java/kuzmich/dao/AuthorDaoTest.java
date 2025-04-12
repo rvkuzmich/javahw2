@@ -4,6 +4,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import kuzmich.entity.Author;
 import kuzmich.entity.Book;
+import kuzmich.utils.ConnectionManager;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +32,7 @@ class AuthorDaoTest {
         postgres.start();
 
         HikariConfig config = new HikariConfig();
+        config.setDriverClassName(postgres.getDriverClassName());
         config.setJdbcUrl(postgres.getJdbcUrl());
         config.setUsername(postgres.getUsername());
         config.setPassword(postgres.getPassword());
@@ -46,16 +48,29 @@ class AuthorDaoTest {
     }
 
     @AfterAll
-    static void afterAll() {
+    static void afterAll() throws Exception {
         authorDao = null;
         bookDao = null;
         postgres.stop();
+        ConnectionManager.close();
     }
 
     @Test
     void emptyConstructorTest() {
-       AuthorDao authorDao = new AuthorDao();
+        System.setProperty("test", "true");
+        System.setProperty("url", postgres.getJdbcUrl());
+        System.setProperty("user", postgres.getUsername());
+        System.setProperty("pass", postgres.getPassword());
+        System.setProperty("driver", postgres.getDriverClassName());
+
+        AuthorDao authorDao = new AuthorDao();
         assertNotNull(authorDao);
+
+        System.clearProperty("test");
+        System.clearProperty("url");
+        System.clearProperty("user");
+        System.clearProperty("pass");
+        System.clearProperty("driver");
     }
 
     @Test
@@ -151,5 +166,4 @@ class AuthorDaoTest {
         assertNotNull(authors);
         assertEquals(2, authors.size());
     }
-
 }

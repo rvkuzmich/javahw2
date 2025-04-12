@@ -4,6 +4,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import kuzmich.entity.Author;
 import kuzmich.entity.Book;
+import kuzmich.utils.ConnectionManager;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,12 +51,25 @@ class BookDaoTest {
         bookDao = null;
         authorDao = null;
         postgres.stop();
+        ConnectionManager.close();
     }
 
     @Test
     void emptyConstructorTest() {
+        System.setProperty("test", "true");
+        System.setProperty("url", postgres.getJdbcUrl());
+        System.setProperty("user", postgres.getUsername());
+        System.setProperty("pass", postgres.getPassword());
+        System.setProperty("driver", postgres.getDriverClassName());
+
         BookDao bookDao = new BookDao();
         assertNotNull(bookDao);
+
+        System.clearProperty("test");
+        System.clearProperty("url");
+        System.clearProperty("user");
+        System.clearProperty("pass");
+        System.clearProperty("driver");
     }
 
     @Test
